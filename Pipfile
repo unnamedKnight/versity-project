@@ -9,6 +9,7 @@ python-dotenv = "*"
 djangorestframework = "*"
 django-cors-headers = "*"
 pillow = "*"
+drf-spectacular = "*"
 
 [dev-packages]
 
