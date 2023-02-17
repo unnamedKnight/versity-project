@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # project applications
     "users.apps.UsersConfig",
     "user_profile.apps.UserProfileConfig",
+    "room.apps.RoomConfig",
 ]
 
 MIDDLEWARE = [
