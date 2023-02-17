@@ -13,6 +13,7 @@ from django.core.mail import EmailMessage
 
 from .serializers import UserSerializer
 from django.contrib.auth import get_user_model
+from user_profile.models import Profile
 
 
 User = get_user_model()
@@ -49,37 +50,44 @@ class RegisterUser(APIView):
 
         # ------------------- confirmation mail ------------------ #
 
-        user_email = user.email
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        current_site = get_current_site(request)
-        confirmation_token = default_token_generator.make_token(user)
-        link = reverse(
-            "activate",
-            kwargs={"uidb64": uid, "token": confirmation_token},
-        )
+        # user_email = user.email
+        # uid = urlsafe_base64_encode(force_bytes(user.pk))
+        # current_site = get_current_site(request)
+        # confirmation_token = default_token_generator.make_token(user)
+        # link = reverse(
+        #     "activate",
+        #     kwargs={"uidb64": uid, "token": confirmation_token},
+        # )
 
-        activate_url = f"http://{current_site.domain}{link}"
-        email_body = (
-            "Hi "
-            + user_email
-            + f", We just need to verify your email address before you can access {current_site.domain}\n"
-            + f"Verify your email address: {activate_url} \n"
-            + "Thanks! – The Out of Business team"
-        )
+        # activate_url = f"http://{current_site.domain}{link}"
+        # email_body = (
+        #     "Hi "
+        #     + user_email
+        #     + f", We just need to verify your email address before you can access {current_site.domain}\n"
+        #     + f"Verify your email address: {activate_url} \n"
+        #     + "Thanks! – The Out of Business team"
+        # )
 
-        email_subject = "Activate Your Account"
-        email = EmailMessage(
-            email_subject,
-            email_body,
-            # sender
-            "forangela100@gmail.com",
-            # receivers
-            [user_email],
-        )
-        # email.send(fail_silently=False)
+        # email_subject = "Activate Your Account"
+        # email = EmailMessage(
+        #     email_subject,
+        #     email_body,
+        #     # sender
+        #     "forangela100@gmail.com",
+        #     # receivers
+        #     [user_email],
+        # )
+        # # email.send(fail_silently=False)
 
-        EmailThread(email).start()
+        # EmailThread(email).start()
 
+        # -------------------------- end ------------------------- #
+
+        # --------------- create a profile Instance -------------- #
+
+        user_profile = Profile.objects.create(user=user, email=user.email)
+        user_profile.save()
+        
         # -------------------------- end ------------------------- #
 
         return Response(
@@ -136,6 +144,7 @@ class Activate(APIView):
 
 class CustomAuthToken(ObtainAuthToken):
     """Returns  a token to a verified user. Equivalent to loginview"""
+
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
             data=request.data, context={"request": request}
@@ -143,10 +152,12 @@ class CustomAuthToken(ObtainAuthToken):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
         if not user.is_verified:
-            return Response({
-                "status": status.HTTP_401_UNAUTHORIZED,
-                "message": "Please Verify Your Email."
-            })
+            return Response(
+                {
+                    "status": status.HTTP_401_UNAUTHORIZED,
+                    "message": "Please Verify Your Email.",
+                }
+            )
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": str(token), "user_id": user.pk, "email": user.email})
 

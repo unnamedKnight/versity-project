@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "corsheaders",
     # project applications
     "users.apps.UsersConfig",
+    "user_profile.apps.UserProfileConfig",
 ]
 
 MIDDLEWARE = [
@@ -137,15 +138,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.User"
 
 
-# REST_FRAMEWORK = {
-#     "DEFAULT_PERMISSION_CLASSES": [
-#         "rest_framework.permissions.IsAuthenticated",
-#     ],
-#     "DEFAULT_AUTHENTICATION_CLASSES": (
-#         "rest_framework.authentication.SessionAuthentication",
-#         "rest_framework.authentication.TokenAuthentication",
-#     ),
-# }
+REST_FRAMEWORK = {
+    # "DEFAULT_PERMISSION_CLASSES": [
+    #     "rest_framework.permissions.IsAuthenticated",
+    # ],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        #     "rest_framework.authentication.BasicAuthentication",
+        # "rest_framework.authentication.SessionAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
+    ),
+}
 
 
 # ---------------- email backend settings --------------- #
@@ -160,3 +162,6 @@ EMAIL_USE_SSL = False
 
 
 # -------------- email backend settings end -------------- #
+MEDIA_URL = "media/"
+# MEDIA_ROOT has to be a string, not a list or tuple
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
