@@ -70,6 +70,8 @@ class RoomSerializer(serializers.ModelSerializer):
 
 
 class RoomCommentSerializer(serializers.ModelSerializer):
+    # user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+
     class Meta:
         model = RoomComment
         fields = ("body",)
