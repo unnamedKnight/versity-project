@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from rest_framework.decorators import action, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from .models import Topic, Room, RoomComment
 from .serializers import RoomSerializer, RoomCommentSerializer
@@ -24,7 +23,6 @@ class AllRoomsView(APIView):
         serializer = RoomSerializer(rooms, many=True)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
-    @permission_classes((IsAuthenticated,))
     def post(self, request, format=None):
         serializer = RoomSerializer(data=request.data)
         topic = request.data.get("topic").strip()
