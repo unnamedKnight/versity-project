@@ -25,8 +25,14 @@ class AllRoomsView(APIView):
 
     def post(self, request, format=None):
         serializer = RoomSerializer(data=request.data)
-        # getting the value of topic field from request.data
-        topic = request.data.get("topic")
+        topic = request.data.get("topic").strip()
+        if topic is None:
+            return Response(
+                {
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "message": "Please provide a value for topic",
+                }
+            )
         # --------------------- working part --------------------- #
         # we are getting or creating a new topic_obj
         # then assigning serializer_initial data with that value
@@ -90,6 +96,27 @@ class UpdateRoomView(APIView):
                 }
             )
         serializer = RoomSerializer(room, data=request.data)
+        topic = request.data.get("topic").strip()
+        if topic is None:
+            return Response(
+                {
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "error": {"topic": ["This field is required"]},
+                    "message": "Please provide a value for topic",
+                }
+            )
+        # --------------------- working part --------------------- #
+        # we are getting or creating a new topic_obj
+        # then assigning serializer_initial data with that value
+        topic_obj, _ = Topic.objects.get_or_create(
+            defaults={"name": topic}, name__iexact=topic
+        )
+        serializer.initial_data._mutable = True
+        serializer.initial_data["topic"] = topic_obj.id
+        serializer.initial_data._mutable = False
+
+        # -------------------------- end ------------------------- #
+
         if serializer.is_valid():
             serializer.save(host=request.user)
             return Response(

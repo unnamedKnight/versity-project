@@ -14,7 +14,7 @@ class TopicField(models.CharField):
     """
 
     def get_prep_value(self, value):
-        return str(value).lower()
+        return str(value).strip().lower()
 
 
 class Topic(models.Model):
@@ -37,7 +37,7 @@ class Room(models.Model):
         ordering = ["-updated", "-created"]
 
     def __str__(self):
-        return self.name
+        return f"{self.name} --> {self.id}"
 
 
 class RoomComment(models.Model):
