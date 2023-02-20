@@ -1,16 +1,67 @@
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, filters
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from .models import Topic, Room, RoomComment
 from .serializers import RoomSerializer, RoomCommentSerializer
+from django_filters.rest_framework import DjangoFilterBackend
+
+from rest_framework.mixins import ListModelMixin
+from rest_framework.generics import GenericAPIView
+from django.db.models import Q
 
 
 User = get_user_model()
 
 # Create your views here.
+
+
+class RoomFilterView(ListModelMixin, GenericAPIView):
+    serializer_class = RoomSerializer
+    queryset = Room.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["topic", "name"]
+    # search_fields = ["topic", "name"]
+
+    def get(self, request, *args, **kwargs):
+        if topic := request.query_params.get("topic", None):
+            rooms = Room.objects.filter(topic__name__icontains=topic).order_by(
+                "-created"
+            )
+        elif name := request.query_params.get("name", None):
+            rooms = Room.objects.filter(name__icontains=name).order_by("-created")
+        elif query_params := request.query_params.get("search"):
+            rooms = Room.objects.filter(
+                Q(name__icontains=query_params) | Q(name__icontains=query_params)
+            ).order_by("-created")
+        else:
+            rooms = Room.objects.all().order_by("-created")
+        serializer = RoomSerializer(rooms, many=True)
+        return Response(data=serializer.data)
+
+    # mark: another implementation of the code above
+    # mark:the quality of the code above is better
+
+    # def get(self, request, *args, **kwargs):
+    #     if topic := request.query_params.get('topic', None):
+    #         print(topic)
+    #         rooms = Room.objects.filter(topic__name__icontains=topic)
+    #         serializer = RoomSerializer(rooms, many=True)
+    #         return Response(data=serializer.data)
+    #     elif name:= request.query_params.get('name', None):
+    #         rooms = Room.objects.filter(name__icontains=name)
+    #         serializer = RoomSerializer(rooms, many=True)
+    #         return Response(data=serializer.data)
+    #     else:
+    #         query_params = request.query_params.get("search")
+    #         rooms = Room.objects.filter(Q(name__icontains=query_params)|
+    #                                     Q(name__icontains=query_params))
+    #         serializer = RoomSerializer(rooms, many=True)
+    #         return Response(data=serializer.data)
+
+    #     return self.list(request, *args, **kwargs)
 
 
 class AllRoomsView(APIView):
