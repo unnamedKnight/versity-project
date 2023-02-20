@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "corsheaders",
+    "django_filters",
     # project applications
     "users.apps.UsersConfig",
     "user_profile.apps.UserProfileConfig",

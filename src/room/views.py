@@ -23,6 +23,10 @@ class AllRoomsView(APIView):
         serializer = RoomSerializer(rooms, many=True)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
+
+class CreateRoom(APIView):
+    permission_classes = [IsAuthenticated]
+
     def post(self, request, format=None):
         serializer = RoomSerializer(data=request.data)
         topic = request.data.get("topic").strip()
@@ -79,6 +83,8 @@ class UpdateRoomView(APIView):
     """
     Update a room instance
     """
+
+    permission_classes = [IsAuthenticated]
 
     def get_object(self, pk):
         try:
@@ -159,8 +165,8 @@ class RoomComments(APIView):
 class UpdateComment(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, room_pk, comment_pk, format=None):
-        comment = RoomComment.objects.get(id=comment_pk, room__id=room_pk)
+    def put(self, request, pk, format=None):
+        comment = RoomComment.objects.get(id=pk)
         if comment.user != request.user:
             return Response(
                 {
@@ -170,7 +176,13 @@ class UpdateComment(APIView):
             )
         serializer = RoomCommentSerializer(comment, data=request.data)
         if serializer.is_valid():
-            serializer.save(room=Room.objects.get(pk=room_pk), user=request.user)
-            return Response({"status": status.HTTP_200_OK, "data": serializer.data})
+            serializer.save(user=request.user)
+            return Response(
+                {
+                    "status": status.HTTP_200_OK,
+                    "data": serializer.data,
+                    "message": "Comment updated successfully",
+                }
+            )
 
         return Response({"Status": status.HTTP_400_BAD_REQUEST})
