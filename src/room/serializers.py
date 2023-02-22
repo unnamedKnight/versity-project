@@ -77,6 +77,7 @@ class RoomCommentSerializer(serializers.ModelSerializer):
         fields = ("body",)
 
     def validate_body(self, value):
-        if value is None:
+        print(f"body value{value}")
+        if value is None or value == '':
             raise serializers.ValidationError("Comment cannot be empty")
         return value

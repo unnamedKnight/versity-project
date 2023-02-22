@@ -165,3 +165,4 @@ EMAIL_USE_SSL = False
 MEDIA_URL = "media/"
 # MEDIA_ROOT has to be a string, not a list or tuple
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+CORS_ORIGIN_ALLOW_ALL = True

@@ -87,7 +87,7 @@ class RegisterUser(APIView):
 
         user_profile = Profile.objects.create(user=user, email=user.email)
         user_profile.save()
-        
+
         # -------------------------- end ------------------------- #
 
         return Response(
@@ -151,13 +151,13 @@ class CustomAuthToken(ObtainAuthToken):
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
-        if not user.is_verified:
-            return Response(
-                {
-                    "status": status.HTTP_401_UNAUTHORIZED,
-                    "message": "Please Verify Your Email.",
-                }
-            )
+        # if not user.is_verified:
+        #     return Response(
+        #         {
+        #             "status": status.HTTP_401_UNAUTHORIZED,
+        #             "message": "Please Verify Your Email.",
+        #         }
+        #     )
         token, created = Token.objects.get_or_create(user=user)
         return Response({"token": str(token), "user_id": user.pk, "email": user.email})
 

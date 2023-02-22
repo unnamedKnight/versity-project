@@ -237,3 +237,6 @@ class UpdateComment(APIView):
             )
 
         return Response({"Status": status.HTTP_400_BAD_REQUEST})
+
+
+# todo: fix empty comment submission
