@@ -5,7 +5,7 @@ from rest_framework import status, filters
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from .models import Topic, Room, RoomComment
-from .serializers import RoomSerializer, RoomCommentSerializer
+from .serializers import RoomSerializer, RoomCommentSerializer, RoomFilterSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.mixins import ListModelMixin
@@ -19,7 +19,7 @@ User = get_user_model()
 
 
 class RoomFilterView(ListModelMixin, GenericAPIView):
-    serializer_class = RoomSerializer
+    serializer_class = RoomFilterSerializer
     queryset = Room.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ["topic", "name"]
@@ -38,7 +38,7 @@ class RoomFilterView(ListModelMixin, GenericAPIView):
             ).order_by("-created")
         else:
             rooms = Room.objects.all().order_by("-created")
-        serializer = RoomSerializer(rooms, many=True)
+        serializer = RoomFilterSerializer(rooms, many=True)
         return Response(data=serializer.data)
 
     # mark: another implementation of the code above
@@ -71,7 +71,7 @@ class AllRoomsView(APIView):
 
     def get(self, request, format=None):
         rooms = Room.objects.all()
-        serializer = RoomSerializer(rooms, many=True)
+        serializer = RoomFilterSerializer(rooms, many=True)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -207,6 +207,13 @@ class RoomComments(APIView):
     # @permission_classes([IsAuthenticated])
     def post(self, request, pk, format=None):
         serializer = RoomCommentSerializer(data=request.data)
+        if request.data.get("body") is None or request.data.get("body") == "":
+            return Response(
+                {
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "message": "Comment cannot be empty",
+                }
+            )
         if not serializer.is_valid():
             return Response({"Status": status.HTTP_400_BAD_REQUEST})
         serializer.save(room=Room.objects.get(pk=pk), user=request.user)
@@ -217,6 +224,14 @@ class UpdateComment(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk, format=None):
+        if request.data.get("body") is None or request.data.get("body") == "":
+            return Response(
+                {
+                    "status": status.HTTP_403_FORBIDDEN,
+                    "message": "Comment cannot be empty",
+                }
+            )
+
         comment = RoomComment.objects.get(id=pk)
         if comment.user != request.user:
             return Response(
@@ -225,6 +240,7 @@ class UpdateComment(APIView):
                     "message": "You do not have permission to perform this action",
                 }
             )
+
         serializer = RoomCommentSerializer(comment, data=request.data)
         if serializer.is_valid():
             serializer.save(user=request.user)
