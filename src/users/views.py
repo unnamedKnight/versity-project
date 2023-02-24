@@ -19,15 +19,15 @@ from user_profile.models import Profile
 User = get_user_model()
 
 
-class EmailThread(threading.Thread):
-    """Using threading for sending email faster"""
+# class EmailThread(threading.Thread):
+#     """Using threading for sending email faster"""
 
-    def __init__(self, email) -> None:
-        self.email = email
-        threading.Thread.__init__(self)
+#     def __init__(self, email) -> None:
+#         self.email = email
+#         threading.Thread.__init__(self)
 
-    def run(self) -> None:
-        self.email.send()
+#     def run(self) -> None:
+#         self.email.send()
 
 
 class RegisterUser(APIView):
@@ -100,46 +100,47 @@ class RegisterUser(APIView):
         )
 
 
-class Activate(APIView):
-    def get(self, request, uidb64, token):
-        try:
-            user_id = force_str(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(id=user_id)
-        except (
-            TypeError,
-            ValueError,
-            OverflowError,
-            User.DoesNotExist,
-            DjangoUnicodeDecodeError,
-        ):
-            user = None
-        if user is None:
-            return Response(
-                {"status": status.HTTP_400_BAD_REQUEST, "message": "User not found"}
-            )
-        if user.is_verified:
-            return Response(
-                {
-                    "status": status.HTTP_400_BAD_REQUEST,
-                    "message": "Email has already been verified.",
-                }
-            )
+# class Activate(APIView):
+#     def get(self, request, uidb64, token):
+#         try:
+#             user_id = force_str(urlsafe_base64_decode(uidb64))
+#             user = User.objects.get(id=user_id)
+#         except (
+#             TypeError,
+#             ValueError,
+#             OverflowError,
+#             User.DoesNotExist,
+#             DjangoUnicodeDecodeError,
+#         ):
+#             user = None
+#         if user is None:
+#             return Response(
+#                 {"status": status.HTTP_400_BAD_REQUEST, "message": "User not found"}
+#             )
+#         if user.is_verified:
+#             return Response(
+#                 {
+#                     "status": status.HTTP_400_BAD_REQUEST,
+#                     "message": "Email has already been verified.",
+#                 }
+#             )
 
-        if not default_token_generator.check_token(user, token):
-            return Response(
-                {
-                    "status": status.HTTP_400_BAD_REQUEST,
-                    "message": "Token is invalid or expired. Please request another confirmation email by signing in.",
-                }
-            )
-        user.is_verified = True
-        user.save()
-        return Response(
-            {
-                "status": status.HTTP_200_OK,
-                "message": "Email Successfully Confirmed",
-            }
-        )
+#         if not default_token_generator.check_token(user, token):
+#             return Response(
+#                 {
+#                     "status": status.HTTP_400_BAD_REQUEST,
+#                     "message": "Token is invalid or expired. Please request \
+    # another confirmation email by signing in.",
+#                 }
+#             )
+#         user.is_verified = True
+#         user.save()
+#         return Response(
+#             {
+#                 "status": status.HTTP_200_OK,
+#                 "message": "Email Successfully Confirmed",
+#             }
+#         )
 
 
 class CustomAuthToken(ObtainAuthToken):

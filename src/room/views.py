@@ -5,7 +5,14 @@ from rest_framework import status, filters
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import IsAuthenticated
 from .models import Topic, Room, RoomComment
-from .serializers import RoomSerializer, RoomCommentSerializer, RoomFilterSerializer
+from user_profile.models import Profile
+from .serializers import (
+    RoomDetailSerializer,
+    RoomCommentSerializer,
+    RoomFilterSerializer,
+    CreateRoomSerializer,
+    RoomCommentDetailSerializer,
+)
 from django_filters.rest_framework import DjangoFilterBackend
 
 from rest_framework.mixins import ListModelMixin
@@ -71,7 +78,7 @@ class AllRoomsView(APIView):
 
     def get(self, request, format=None):
         rooms = Room.objects.all()
-        serializer = RoomFilterSerializer(rooms, many=True)
+        serializer = RoomDetailSerializer(rooms, many=True)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -79,8 +86,8 @@ class CreateRoom(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        serializer = RoomSerializer(data=request.data)
-        topic = request.data.get("topic").strip()
+        serializer = CreateRoomSerializer(data=request.data)
+        topic = request.data.get("topic")
         if topic is None:
             return Response(
                 {
@@ -91,16 +98,24 @@ class CreateRoom(APIView):
         # --------------------- working part --------------------- #
         # we are getting or creating a new topic_obj
         # then assigning serializer_initial data with that value
+        topic = request.data.get("topic").strip()
         topic_obj, _ = Topic.objects.get_or_create(
             defaults={"name": topic}, name__iexact=topic
         )
-        serializer.initial_data._mutable = True
-        serializer.initial_data["topic"] = topic_obj.id
-        serializer.initial_data._mutable = False
+        # serializer.initial_data._mutable = True
+        # serializer.initial_data["topic"] = topic_obj.id
+        # serializer.initial_data._mutable = False
+
+        data = request.POST.dict()
+        mutable_data = dict(data)
+        mutable_data["topic"] = topic_obj.id
+
+        serializer = CreateRoomSerializer(data=mutable_data)
+
 
         # -------------------------- end ------------------------- #
         if serializer.is_valid():
-            serializer.save(host=request.user)
+            serializer.save(host=Profile.objects.get(user=request.user))
             return Response(
                 {
                     "status": status.HTTP_201_CREATED,
@@ -126,7 +141,7 @@ class RoomDetailView(APIView):
 
     def get(self, request, pk, format=None):
         room = self.get_object(pk)
-        serializer = RoomSerializer(room)
+        serializer = RoomDetailSerializer(room)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -145,15 +160,15 @@ class UpdateRoomView(APIView):
 
     def put(self, request, pk, format=None):
         room = self.get_object(pk)
-        if room.host != request.user:
+        if room.host != Profile.objects.get(user=request.user):
             return Response(
                 {
                     "status": status.HTTP_401_UNAUTHORIZED,
                     "message": "You do not have permission to perform this action",
                 }
             )
-        serializer = RoomSerializer(room, data=request.data)
-        topic = request.data.get("topic").strip()
+        # serializer = CreateRoomSerializer(room, data=request.data)
+        topic = request.data.get("topic")
         if topic is None:
             return Response(
                 {
@@ -162,20 +177,28 @@ class UpdateRoomView(APIView):
                     "message": "Please provide a value for topic",
                 }
             )
+        topic = request.data.get("topic").strip()
         # --------------------- working part --------------------- #
         # we are getting or creating a new topic_obj
         # then assigning serializer_initial data with that value
         topic_obj, _ = Topic.objects.get_or_create(
             defaults={"name": topic}, name__iexact=topic
         )
-        serializer.initial_data._mutable = True
-        serializer.initial_data["topic"] = topic_obj.id
-        serializer.initial_data._mutable = False
+
+        data = request.POST.dict()
+        mutable_data = dict(data)
+        mutable_data["topic"] = topic_obj.id
+
+        serializer = CreateRoomSerializer(data=mutable_data)
+
+        # serializer.initial_data._mutable = True
+        # serializer.initial_data["topic"] = topic_obj.id
+        # serializer.initial_data._mutable = False
 
         # -------------------------- end ------------------------- #
 
         if serializer.is_valid():
-            serializer.save(host=request.user)
+            serializer.save(host=Profile.objects.get(user=request.user))
             return Response(
                 {
                     "status": status.HTTP_200_OK,
@@ -200,23 +223,26 @@ class RoomComments(APIView):
         if not room:
             return Response({"status": status.HTTP_400_BAD_REQUEST})
         comments = RoomComment.objects.filter(room=room)
-        serializer = RoomSerializer(comments, many=True)
+        serializer = RoomCommentDetailSerializer(comments, many=True)
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
     # decorator doesn't work with APIView methods
     # @permission_classes([IsAuthenticated])
     def post(self, request, pk, format=None):
         serializer = RoomCommentSerializer(data=request.data)
-        if request.data.get("body") is None or request.data.get("body") == "":
-            return Response(
-                {
-                    "status": status.HTTP_403_FORBIDDEN,
-                    "message": "Comment cannot be empty",
-                }
-            )
+        # if request.data.get("body") is None or request.data.get("body") == "":
+        #     return Response(
+        #         {
+        #             "status": status.HTTP_403_FORBIDDEN,
+        #             "message": "Comment cannot be empty",
+        #         }
+        # )
         if not serializer.is_valid():
             return Response({"Status": status.HTTP_400_BAD_REQUEST})
-        serializer.save(room=Room.objects.get(pk=pk), user=request.user)
+        serializer.save(
+            room=Room.objects.get(pk=pk),
+            comment_owner=Profile.objects.get(user=request.user),
+        )
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -237,7 +263,7 @@ class UpdateComment(APIView):
         #     )
 
         comment = RoomComment.objects.get(id=pk)
-        if comment.user != request.user:
+        if comment.comment_owner != Profile.objects.get(user=request.user):
             return Response(
                 {
                     "status": status.HTTP_401_UNAUTHORIZED,
@@ -247,7 +273,7 @@ class UpdateComment(APIView):
 
         serializer = RoomCommentSerializer(comment, data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(comment_owner=Profile.objects.get(user=request.user))
             return Response(
                 {
                     "status": status.HTTP_200_OK,

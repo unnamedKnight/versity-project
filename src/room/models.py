@@ -2,8 +2,7 @@ from django.db import models
 
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
+from user_profile.models import Profile
 
 # Create your models here.
 
@@ -25,11 +24,11 @@ class Topic(models.Model):
 
 
 class Room(models.Model):
-    host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, null=True)
+    host = models.ForeignKey(Profile, related_name="host", on_delete=models.SET_NULL, null=True)
+    topic = models.ForeignKey(Topic, related_name="topic", on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=200)
     description = models.TextField(null=True, blank=True)
-    participants = models.ManyToManyField(User, related_name="participants", blank=True)
+    participants = models.ManyToManyField(Profile, related_name="participants", blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
@@ -41,8 +40,8 @@ class Room(models.Model):
 
 
 class RoomComment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    room = models.ForeignKey(Room, on_delete=models.CASCADE)
+    comment_owner = models.ForeignKey(Profile, related_name="comment_owner", on_delete=models.CASCADE)
+    room = models.ForeignKey(Room, related_name="comments", on_delete=models.CASCADE)
     body = models.TextField()
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)

@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 
 from .models import Topic, Room, RoomComment
+from user_profile.models import Profile
 
 
 class TopicSerializer(serializers.ModelSerializer):
@@ -39,7 +40,53 @@ class RoomFilterSerializer(serializers.ModelSerializer):
         fields = ("topic", "name", "description")
 
 
-class RoomSerializer(serializers.ModelSerializer):
+# -- Adding CommentSerializer and ProfileSerializer for RoomDetailSerializer - #
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ("id", "first_name", "last_name", "email", "image", "github_link")
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    comment_owner = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = RoomComment
+        fields = ("id", "room", "comment_owner", "body")
+        extra_kwargs = {
+            "id": {
+                "read_only": True,
+            },
+            "room": {
+                "read_only": True,
+            },
+        }
+
+
+class RoomDetailSerializer(serializers.ModelSerializer):
+    host = ProfileSerializer(read_only=True)
+    topic = TopicSerializer(read_only=True)
+    comments = CommentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Room
+        fields = (
+            "id",
+            "host",
+            "topic",
+            "name",
+            "description",
+            "participants",
+            "comments",
+        )
+
+
+# ------------------------- RoomDetailSerializer End ------------------------- #
+
+
+class CreateRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ("topic", "name", "description")
@@ -75,6 +122,26 @@ class RoomSerializer(serializers.ModelSerializer):
     #         setattr(instance, attr, value)
     #     instance.save()
     #     return instance
+
+
+# class UpdateRoomSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Room
+#         fields = ("id", "topic", "name", "description")
+#         extra_kwargs = {"id": {"read_only": True}}
+
+
+class RoomCommentDetailSerializer(serializers.ModelSerializer):
+    comment_owner = ProfileSerializer(read_only=True)
+
+    class Meta:
+        model = RoomComment
+        fields = ("id", "comment_owner", "body")
+        extra_kwargs = {
+            "id": {
+                "read_only": True,
+            }
+        }
 
 
 class RoomCommentSerializer(serializers.ModelSerializer):
