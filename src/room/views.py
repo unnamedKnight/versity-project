@@ -224,13 +224,17 @@ class UpdateComment(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request, pk, format=None):
-        if request.data.get("body") is None or request.data.get("body") == "":
-            return Response(
-                {
-                    "status": status.HTTP_403_FORBIDDEN,
-                    "message": "Comment cannot be empty",
-                }
-            )
+        # body_data = request.data.get("body")
+        # constrain1 = '""'
+        # constrain2 = "''"
+
+        # if body_data is None or body_data == constrain1 or body_data == constrain2:
+        #     return Response(
+        #         {
+        #             "status": status.HTTP_403_FORBIDDEN,
+        #             "message": "Comment cannot be empty",
+        #         }
+        #     )
 
         comment = RoomComment.objects.get(id=pk)
         if comment.user != request.user:
@@ -255,4 +259,4 @@ class UpdateComment(APIView):
         return Response({"Status": status.HTTP_400_BAD_REQUEST})
 
 
-# todo: fix empty comment submission
+# todo: add nested serializers in certain model

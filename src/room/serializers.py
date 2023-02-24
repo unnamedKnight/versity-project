@@ -30,13 +30,13 @@ class TopicSerializer(serializers.ModelSerializer):
     #     instance.save()
     #     return instance
 
+
 class RoomFilterSerializer(serializers.ModelSerializer):
     topic = serializers.StringRelatedField()
 
     class Meta:
         model = Room
         fields = ("topic", "name", "description")
-
 
 
 class RoomSerializer(serializers.ModelSerializer):
@@ -84,8 +84,19 @@ class RoomCommentSerializer(serializers.ModelSerializer):
         model = RoomComment
         fields = ("body",)
 
-    # def validate_body(self, value):
-    #     print(f"body value{value}")
-    #     if value is None or value == '':
-    #         raise serializers.ValidationError("Comment cannot be empty")
-    #     return value
+    def validate_body(self, value):
+        constrain1 = '""'
+        constrain2 = "''"
+        splitted_value = value.split()
+        check_value = "".join(splitted_value)
+
+        if (
+            value is None
+            or value == constrain1
+            or value == constrain2
+            or len(splitted_value) == 0
+            or check_value == constrain1
+            or check_value == constrain2
+        ):
+            raise serializers.ValidationError("Comment cannot be empty")
+        return value
