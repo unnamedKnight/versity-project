@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Topic, Room, RoomComment
 from user_profile.models import Profile
 from .serializers import (
+    TopicSerializer,
     RoomDetailSerializer,
     RoomCommentSerializer,
     RoomFilterSerializer,
@@ -86,7 +87,7 @@ class CreateRoom(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        serializer = CreateRoomSerializer(data=request.data)
+        # serializer = CreateRoomSerializer(data=request.data)
         topic = request.data.get("topic")
         if topic is None:
             return Response(
@@ -111,7 +112,6 @@ class CreateRoom(APIView):
         mutable_data["topic"] = topic_obj.id
 
         serializer = CreateRoomSerializer(data=mutable_data)
-
 
         # -------------------------- end ------------------------- #
         if serializer.is_valid():
@@ -177,10 +177,10 @@ class UpdateRoomView(APIView):
                     "message": "Please provide a value for topic",
                 }
             )
-        topic = request.data.get("topic").strip()
         # --------------------- working part --------------------- #
         # we are getting or creating a new topic_obj
         # then assigning serializer_initial data with that value
+        topic = request.data.get("topic").strip()
         topic_obj, _ = Topic.objects.get_or_create(
             defaults={"name": topic}, name__iexact=topic
         )
@@ -285,4 +285,46 @@ class UpdateComment(APIView):
         return Response({"Status": status.HTTP_400_BAD_REQUEST})
 
 
-# todo: add nested serializers in certain model
+# // todo: show user data in participants fields
+# // todo: add participants endpoint
+# // todo : add all-topics endpoint
+# // todo: add recent activities endpoint
+
+
+class AddParticipants(APIView):
+    def post(self, request, pk):
+        room = Room.objects.get(pk=pk)
+        user_profile = Profile.objects.get(user=request.user)
+        if user_profile in room.participants.all():
+            return Response(
+                {
+                    "status": status.HTTP_400_BAD_REQUEST,
+                    "message": "User already joined this room!",
+                }
+            )
+        room.participants.add(user_profile)
+        return Response(
+            {
+                "status": status.HTTP_200_OK,
+                "message": "You have joined this room successfully",
+            }
+        )
+
+
+class AllTopic(APIView):
+    def get(self, request):
+        topics = Topic.objects.all()
+        serializer = TopicSerializer(topics, many=True)
+        return Response(
+            {
+                "status": status.HTTP_200_OK,
+                "data": serializer.data,
+            }
+        )
+
+
+class RecentActivity(APIView):
+    def get(self, request, *args, **kwargs):
+        comments = RoomComment.objects.all()
+        serializer = RoomCommentDetailSerializer(comments, many=True)
+        return Response({"status": status.HTTP_200_OK, "data": serializer.data})

@@ -69,6 +69,7 @@ class RoomDetailSerializer(serializers.ModelSerializer):
     host = ProfileSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
     comments = CommentSerializer(many=True, read_only=True)
+    participants = ProfileSerializer(many=True, read_only=True)
 
     class Meta:
         model = Room
