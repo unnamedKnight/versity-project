@@ -189,7 +189,7 @@ class UpdateRoomView(APIView):
         mutable_data = dict(data)
         mutable_data["topic"] = topic_obj.id
 
-        serializer = CreateRoomSerializer(data=mutable_data)
+        serializer = CreateRoomSerializer(room, data=mutable_data)
 
         # serializer.initial_data._mutable = True
         # serializer.initial_data["topic"] = topic_obj.id
@@ -311,7 +311,7 @@ class AddParticipants(APIView):
         )
 
 
-class AllTopic(APIView):
+class AllTopics(APIView):
     def get(self, request):
         topics = Topic.objects.all()
         serializer = TopicSerializer(topics, many=True)
