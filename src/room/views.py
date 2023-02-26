@@ -285,13 +285,10 @@ class UpdateComment(APIView):
         return Response({"Status": status.HTTP_400_BAD_REQUEST})
 
 
-# // todo: show user data in participants fields
-# // todo: add participants endpoint
-# // todo : add all-topics endpoint
-# // todo: add recent activities endpoint
-
-
 class AddParticipants(APIView):
+    permission_classes = [IsAuthenticated]
+    
+
     def post(self, request, pk):
         room = Room.objects.get(pk=pk)
         user_profile = Profile.objects.get(user=request.user)
