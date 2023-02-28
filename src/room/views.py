@@ -107,7 +107,7 @@ class CreateRoom(APIView):
         # serializer.initial_data["topic"] = topic_obj.id
         # serializer.initial_data._mutable = False
 
-        data = request.POST.dict()
+        data = request.data.copy()
         mutable_data = dict(data)
         mutable_data["topic"] = topic_obj.id
 
@@ -185,7 +185,8 @@ class UpdateRoomView(APIView):
             defaults={"name": topic}, name__iexact=topic
         )
 
-        data = request.POST.dict()
+        # data = request.POST.dict()
+        data = request.data.copy()
         mutable_data = dict(data)
         mutable_data["topic"] = topic_obj.id
 
@@ -287,7 +288,7 @@ class UpdateComment(APIView):
 
 class AddParticipants(APIView):
     permission_classes = [IsAuthenticated]
-    
+
 
     def post(self, request, pk):
         room = Room.objects.get(pk=pk)
