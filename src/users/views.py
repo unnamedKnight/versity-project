@@ -152,6 +152,7 @@ class CustomAuthToken(ObtainAuthToken):
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
+        profile = Profile.object.get(user=user)
         # if not user.is_verified:
         #     return Response(
         #         {
@@ -160,7 +161,7 @@ class CustomAuthToken(ObtainAuthToken):
         #         }
         #     )
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": str(token), "user_id": user.pk, "email": user.email})
+        return Response({"token": str(token), "user_id": user.pk, "email": user.email, "profile_id": profile.id})
 
 
 class LogoutView(APIView):
