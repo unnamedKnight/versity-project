@@ -152,7 +152,7 @@ class CustomAuthToken(ObtainAuthToken):
         )
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data["user"]
-        profile = Profile.object.get(user=user)
+        profile = Profile.objects.get(user=user)
         # if not user.is_verified:
         #     return Response(
         #         {

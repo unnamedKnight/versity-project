@@ -30,11 +30,13 @@ class TopicSerializer(serializers.ModelSerializer):
     #     instance.name = self._get_or_create_topic(topic.lower())
     #     instance.save()
     #     return instance
-    
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ("id", "first_name", "last_name", "email", "image", "github_link")
+
 
 class CommentSerializer(serializers.ModelSerializer):
     comment_owner = ProfileSerializer(read_only=True)
@@ -51,6 +53,7 @@ class CommentSerializer(serializers.ModelSerializer):
             },
         }
 
+
 class RoomFilterSerializer(serializers.ModelSerializer):
     host = ProfileSerializer(read_only=True)
     topic = TopicSerializer(read_only=True)
@@ -59,14 +62,18 @@ class RoomFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ("topic", "name", "description")
+        fields = (
+            "id",
+            "host",
+            "topic",
+            "name",
+            "description",
+            "participants",
+            "comments",
+        )
 
 
 # -- Adding CommentSerializer and ProfileSerializer for RoomDetailSerializer - #
-
-
-
-
 
 
 class RoomDetailSerializer(serializers.ModelSerializer):
