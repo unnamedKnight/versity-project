@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .serializers import ProfileSerializer
+from .serializers import ProfileUpdateSerializer, ProfileDetailSerializer
 from .models import Profile
 
 # Create your views here.
@@ -27,7 +27,7 @@ class ProfileDetailView(APIView):
         # if request.auth.key:
         #     print(f"user auth key: {request.auth.key}")
         profile = self.get_object(pk)
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileDetailSerializer(profile, context={"request": request})
         return Response(
             {
                 "status": status.HTTP_200_OK,
@@ -99,7 +99,7 @@ class UpdateProfile(APIView):
                 }
             )
 
-        serializer = ProfileSerializer(profile, data=request.data)
+        serializer = ProfileUpdateSerializer(profile, data=request.data)
         if serializer.is_valid():
             # saving the foreign key field while saving the serializer
             serializer.save(user=profile.user)

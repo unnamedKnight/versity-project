@@ -79,7 +79,9 @@ class AllRoomsView(APIView):
 
     def get(self, request, format=None):
         rooms = Room.objects.all()
-        serializer = RoomDetailSerializer(rooms, many=True)
+        serializer = RoomDetailSerializer(
+            rooms, many=True, context={"request": request}
+        )
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -288,7 +290,6 @@ class UpdateComment(APIView):
 
 class AddParticipants(APIView):
     permission_classes = [IsAuthenticated]
-
 
     def post(self, request, pk):
         room = Room.objects.get(pk=pk)

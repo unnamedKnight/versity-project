@@ -33,9 +33,18 @@ class TopicSerializer(serializers.ModelSerializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
+
+    image_url = serializers.SerializerMethodField()
+
     class Meta:
         model = Profile
-        fields = ("id", "first_name", "last_name", "email", "image", "github_link")
+        fields = ("id", "first_name", "last_name", "email", "image_url", "github_link")
+
+    def get_image_url(self, instance):
+        request = self.context.get('request')
+        image_url = instance.image.url
+        return request.build_absolute_uri(image_url)
+
 
 
 class RoomSerializer(serializers.ModelSerializer):
