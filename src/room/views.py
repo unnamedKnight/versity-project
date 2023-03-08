@@ -46,7 +46,9 @@ class RoomFilterView(ListModelMixin, GenericAPIView):
             ).order_by("-created")
         else:
             rooms = Room.objects.all().order_by("-created")
-        serializer = RoomFilterSerializer(rooms, many=True)
+        serializer = RoomFilterSerializer(
+            rooms, many=True, context={"request": request}
+        )
         return Response(data=serializer.data)
 
     # mark: another implementation of the code above
@@ -143,7 +145,7 @@ class RoomDetailView(APIView):
 
     def get(self, request, pk, format=None):
         room = self.get_object(pk)
-        serializer = RoomDetailSerializer(room)
+        serializer = RoomDetailSerializer(room, context={"request": request})
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
 
@@ -226,7 +228,9 @@ class RoomComments(APIView):
         if not room:
             return Response({"status": status.HTTP_400_BAD_REQUEST})
         comments = RoomComment.objects.filter(room=room)
-        serializer = RoomCommentDetailSerializer(comments, many=True)
+        serializer = RoomCommentDetailSerializer(
+            comments, many=True, context={"request": request}
+        )
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
 
     # decorator doesn't work with APIView methods
@@ -325,5 +329,7 @@ class AllTopics(APIView):
 class RecentActivity(APIView):
     def get(self, request, *args, **kwargs):
         comments = RoomComment.objects.all()
-        serializer = RoomCommentDetailSerializer(comments, many=True)
+        serializer = RoomCommentDetailSerializer(
+            comments, many=True, context={"request": request}
+        )
         return Response({"status": status.HTTP_200_OK, "data": serializer.data})
