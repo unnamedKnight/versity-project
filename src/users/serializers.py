@@ -8,20 +8,28 @@ User = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(max_length=155, required=True)
+    last_name = serializers.CharField(max_length=155, required=True)
     password2 = serializers.CharField(style={"input_type": "password"}, write_only=True)
 
     class Meta:
         model = User
-        fields = ["email", "password", "password2"]
+        fields = ["first_name", "last_name", "email", "password", "password2"]
         extra_kwargs = {
-            "password": {"write_only": True},
-            "style": {"input_type": "password"},
+            "password": {"write_only": True, "style": {"input_type": "password"}},
         }
 
     def save(self):
         password = self.validated_data["password"]
-
         password2 = self.validated_data.pop("password2")
+
+        first_name = self.validated_data.get("first_name", None)
+        if first_name is None:
+            raise serializers.ValidationError({"error": "First name must be provided"})
+
+        last_name = self.validated_data.get("last_name", None)
+        if last_name is None:
+            raise serializers.ValidationError({"error": "Last name must be provided"})
 
         if password != password2:
             raise serializers.ValidationError(

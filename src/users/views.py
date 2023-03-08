@@ -32,6 +32,10 @@ User = get_user_model()
 
 class RegisterUser(APIView):
     def post(self, request):
+
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+
         serializer = UserSerializer(data=request.data)
 
         if not serializer.is_valid():
@@ -85,7 +89,9 @@ class RegisterUser(APIView):
 
         # --------------- create a profile Instance -------------- #
 
-        user_profile = Profile.objects.create(user=user, email=user.email)
+        user_profile = Profile.objects.create(
+            user=user, first_name=first_name, last_name=last_name, email=user.email
+        )
         user_profile.save()
 
         # -------------------------- end ------------------------- #
@@ -130,7 +136,7 @@ class RegisterUser(APIView):
 #                 {
 #                     "status": status.HTTP_400_BAD_REQUEST,
 #                     "message": "Token is invalid or expired. Please request \
-    # another confirmation email by signing in.",
+# another confirmation email by signing in.",
 #                 }
 #             )
 #         user.is_verified = True
@@ -161,7 +167,14 @@ class CustomAuthToken(ObtainAuthToken):
         #         }
         #     )
         token, created = Token.objects.get_or_create(user=user)
-        return Response({"token": str(token), "user_id": user.pk, "email": user.email, "profile_id": profile.id})
+        return Response(
+            {
+                "token": str(token),
+                "user_id": user.pk,
+                "email": user.email,
+                "profile_id": profile.id,
+            }
+        )
 
 
 class LogoutView(APIView):
