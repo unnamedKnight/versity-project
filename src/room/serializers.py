@@ -38,17 +38,26 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ("id", "first_name", "last_name", "email", "image", "github_link")
 
 
+class RoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Room
+        fields = ("id", "host", "topic", "name", "description")
+
+
 class CommentSerializer(serializers.ModelSerializer):
     comment_owner = ProfileSerializer(read_only=True)
 
     class Meta:
         model = RoomComment
-        fields = ("id", "room", "comment_owner", "body")
+        fields = ("id", "room", "comment_owner", "body", "created")
         extra_kwargs = {
             "id": {
                 "read_only": True,
             },
             "room": {
+                "read_only": True,
+            },
+            "created": {
                 "read_only": True,
             },
         }
@@ -145,14 +154,18 @@ class CreateRoomSerializer(serializers.ModelSerializer):
 
 class RoomCommentDetailSerializer(serializers.ModelSerializer):
     comment_owner = ProfileSerializer(read_only=True)
+    room = RoomSerializer(read_only=True)
 
     class Meta:
         model = RoomComment
-        fields = ("id", "comment_owner", "body")
+        fields = ("id", "comment_owner", "room", "body", "created")
         extra_kwargs = {
             "id": {
                 "read_only": True,
-            }
+            },
+            "created": {
+                "read_only": True,
+            },
         }
 
 
