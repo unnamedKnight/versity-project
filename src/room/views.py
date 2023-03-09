@@ -111,12 +111,13 @@ class CreateRoom(APIView):
         # serializer.initial_data["topic"] = topic_obj.id
         # serializer.initial_data._mutable = False
 
-        data = request.data.dict()
-        data["topic"] = topic_obj.id
+        data = request.data.copy()
+        mutable_data = dict(data)
+        mutable_data["topic"] = topic_obj.id
         # mutable_data['name'] = mutable_data['name'][0]
         # mutable_data['description'] = mutable_data['description'][0]
 
-        serializer = CreateRoomSerializer(data=data)
+        serializer = CreateRoomSerializer(data=mutable_data)
 
         print(serializer.initial_data)
         # -------------------------- end ------------------------- #
@@ -192,14 +193,15 @@ class UpdateRoomView(APIView):
         )
 
         # data = request.POST.dict()
-        data = request.data.dict()
-        data["topic"] = topic_obj.id
+        data = request.data.copy()
+        mutable_data = dict(data)
+        mutable_data["topic"] = topic_obj.id
         # mutable_data = dict(data)
         # mutable_data["topic"] = topic_obj.id
         # mutable_data['name'] = mutable_data['name'][0]
         # mutable_data['description'] = mutable_data['description'][0]
 
-        serializer = CreateRoomSerializer(room, data=data)
+        serializer = CreateRoomSerializer(room, data=mutable_data)
 
         # serializer.initial_data._mutable = True
         # serializer.initial_data["topic"] = topic_obj.id
