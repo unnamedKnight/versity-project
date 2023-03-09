@@ -5,8 +5,8 @@ they can share their thoughts, problems, latest events in the technology communi
 
 
 ## Technologies Used
-**Frontend:** Angular, HTML, CSS, JavaScrip
-**Backend:** Django, Django_Rest_Framework
+**Frontend:** Angular, HTML, CSS, JavaScrip <br>
+**Backend:** Django, Django_Rest_Framework<br>
 **Authentication:** TOKEN AUTHENTICATION
 
 ## Features
