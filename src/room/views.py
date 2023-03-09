@@ -111,14 +111,14 @@ class CreateRoom(APIView):
         # serializer.initial_data["topic"] = topic_obj.id
         # serializer.initial_data._mutable = False
 
-        data = request.data.copy()
-        mutable_data = dict(data)
-        mutable_data["topic"] = topic_obj.id
-        mutable_data['name'] = mutable_data['name'][0]
-        mutable_data['description'] = mutable_data['description'][0]
+        data = request.data.dict()
+        data["topic"] = topic_obj.id
+        # mutable_data['name'] = mutable_data['name'][0]
+        # mutable_data['description'] = mutable_data['description'][0]
 
-        serializer = CreateRoomSerializer(data=mutable_data)
+        serializer = CreateRoomSerializer(data=data)
 
+        print(serializer.initial_data)
         # -------------------------- end ------------------------- #
         if serializer.is_valid():
             serializer.save(host=Profile.objects.get(user=request.user))
@@ -126,7 +126,7 @@ class CreateRoom(APIView):
                 {
                     "status": status.HTTP_201_CREATED,
                     "message": "New Room created successfully",
-                    "data": serializer.data,
+                    "data": serializer.data
                 }
             )
         return Response(
@@ -192,13 +192,14 @@ class UpdateRoomView(APIView):
         )
 
         # data = request.POST.dict()
-        data = request.data.copy()
-        mutable_data = dict(data)
-        mutable_data["topic"] = topic_obj.id
-        mutable_data['name'] = mutable_data['name'][0]
-        mutable_data['description'] = mutable_data['description'][0]
+        data = request.data.dict()
+        data["topic"] = topic_obj.id
+        # mutable_data = dict(data)
+        # mutable_data["topic"] = topic_obj.id
+        # mutable_data['name'] = mutable_data['name'][0]
+        # mutable_data['description'] = mutable_data['description'][0]
 
-        serializer = CreateRoomSerializer(room, data=mutable_data)
+        serializer = CreateRoomSerializer(room, data=data)
 
         # serializer.initial_data._mutable = True
         # serializer.initial_data["topic"] = topic_obj.id
