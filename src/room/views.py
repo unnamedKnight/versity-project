@@ -114,6 +114,8 @@ class CreateRoom(APIView):
         data = request.data.copy()
         mutable_data = dict(data)
         mutable_data["topic"] = topic_obj.id
+        mutable_data['name'] = mutable_data['name'][0]
+        mutable_data['description'] = mutable_data['description'][0]
 
         serializer = CreateRoomSerializer(data=mutable_data)
 
@@ -193,6 +195,8 @@ class UpdateRoomView(APIView):
         data = request.data.copy()
         mutable_data = dict(data)
         mutable_data["topic"] = topic_obj.id
+        mutable_data['name'] = mutable_data['name'][0]
+        mutable_data['description'] = mutable_data['description'][0]
 
         serializer = CreateRoomSerializer(room, data=mutable_data)
 
@@ -214,6 +218,27 @@ class UpdateRoomView(APIView):
         return Response(
             {"status": status.HTTP_400_BAD_REQUEST, "error": serializer.errors}
         )
+
+
+class DeleteRoomView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        room = Room.objects.get(pk=pk)
+        if room.host != Profile.objects.get(user=request.user):
+            return Response({
+                "status": status.HTTP_403_FORBIDDEN,
+                "message": "You don't have permission to perform this action."
+            })
+
+        room.delete()
+        return Response({
+            "status": status.HTTP_204_NO_CONTENT,
+            "message": "Room deleted successfully"
+        })
+
+
+
 
 
 class RoomComments(APIView):
