@@ -5,9 +5,9 @@ they can share their thoughts, problems, latest events in the technology communi
 
 
 ## Technologies Used
-### Frontend: Angular, HTML, CSS, JavaScript
-### Backend: Django, Django_Rest_Framework
-### Authentication: TOKEN AUTHENTICATION
+**Frontend:** Angular, HTML, CSS, JavaScrip
+**Backend:** Django, Django_Rest_Framework
+**Authentication:** TOKEN AUTHENTICATION
 
 ## Features
 - Users can create an account and log in
@@ -15,4 +15,4 @@ they can share their thoughts, problems, latest events in the technology communi
 - Users can create, edit, and delete their own rooms
 - Users can comment on posts
 
-This project was created by [Your Name Here].
+This project was created by [1949CSE00767, 1949CSE00773, 1848CSE00737]
