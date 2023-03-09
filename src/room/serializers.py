@@ -41,13 +41,16 @@ class ProfileSerializer(serializers.ModelSerializer):
         fields = ("id", "first_name", "last_name", "email", "image_url", "github_link")
 
     def get_image_url(self, instance):
-        request = self.context.get('request')
+        request = self.context.get("request")
         image_url = instance.image.url
         return request.build_absolute_uri(image_url)
 
 
 
 class RoomSerializer(serializers.ModelSerializer):
+    host = ProfileSerializer(read_only=True)
+    topic = TopicSerializer(read_only=True)
+
     class Meta:
         model = Room
         fields = ("id", "host", "topic", "name", "description")
